@@ -2,38 +2,55 @@
 	"use strict";
 	var someOpen=false;
 
+	var FORMAT_RGB = 'rgb';
+	var FORMAT_HSL = 'hsl';
+	var FORMAT_HEX = 'hex';
 
-	var ColorPicker = function(input, format) {
-		this.input = input;
-		this.format = format;
-		this.autoUpdate = true;
 
-		this.values = {
+	var ColorPicker = function(o) {
+		var me = this;
+		o = o || {};
+
+		if(o.input) {
+			me.input = o.input;
+			me.input.addEventListener("click", function(e) {
+				var startColor = e.target.value;
+				me.open(startColor);
+			}, false);
+		}
+
+		me.format = o.format || FORMAT_HEX;
+		me.autoUpdate = o.autoUpdate || true;
+		me.onchange = o.onchange || null;
+
+		me.values = {
 			r:0, g:0, b:0,
 			h:0, s:0, v:0,
 			a: 1
 		};
 
-		this.input.addEventListener("click", this.createTool.bind(this), false);
 	};
 
 
 	ColorPicker.prototype = {
 
-
-		createTool: function(e) {
+		open: function(startColor) {
 			console.debug("create tool");
 			someOpen=true;
-			/*
-			e.stopPropagation();
-			*/
 			this.close();
 
-			this.inputValue = this.input.value;
+			this.startValue = startColor;
+
+			if(this.input) {
+				this.keyDownBinding = this.keyDown.bind(this);
+				this.input.addEventListener("keydown", this.keyDownBinding, false);
+			}
+
 
 			this.picker = document.createElement("div");
 			this.picker.classList.add("xcp_picker");
 			this.picker.addEventListener("mousedown", this.pickerMouseDown.bind(this));
+			this.picker.css({top: 10, left: 400});
 			document.body.appendChild(this.picker);
 
 			this.main = document.createElement("div");
@@ -84,7 +101,7 @@
 
 
 
-			if(this.inputValue) {
+			if(this.startValue) {
 				this.before = document.createElement("div");
 				this.before.classList.add("xcp_before");
 				this.footer.appendChild(this.before);
@@ -125,19 +142,14 @@
 			this.fields.appendChild(this.outputHEX);
 
 
-			this.keyDownBinding = this.keyDown.bind(this);
-			this.input.addEventListener("keydown", this.keyDownBinding, false);
 
-
-			if(this.inputValue) {
-				this.parseInput(this.inputValue);
+			if(this.startValue) {
+				this.parseInput(this.startValue);
 				this.before.style.backgroundColor = this.getRGB();
 			} else {
 				this.updateInputs();
 				this.updateMarkers();
 			}
-
-			//this.setWidth(300);
 		},
 
 		updateInputs: function() {
@@ -158,7 +170,7 @@
 				b=this.values.b,
 				a=this.values.a;
 
-			if(this.values.a<1) {
+			if(a<1) {
 				return "rgba("+r+","+g+","+b+","+a+")";
 			} else {
 				return "rgb("+r+","+g+","+b+")";
@@ -171,8 +183,7 @@
 				l=Math.round(this.values.v*100),
 				a=this.values.a;
 
-			console.debug("values", this.values);
-			if(this.values.a<1) {
+			if(a<1) {
 				return "hsla("+h+","+s+"%,"+l+"%,"+a+")";
 			} else {
 				return "hsl("+h+","+s+ "%,"+l+"%)";
@@ -180,32 +191,22 @@
 		},
 
 		getHex: function() {
-			var r = this.dec2hexWithPad(this.values.r),
-				g = this.dec2hexWithPad(this.values.g),
-				b = this.dec2hexWithPad(this.values.b);
+			var r = componentToHex(this.values.r),
+				g = componentToHex(this.values.g),
+				b = componentToHex(this.values.b);
 			return "#"+r+g+b;
+
+			function componentToHex(dec) {
+				var hex = dec.toString(16);
+				if(hex.length==1) hex="0"+hex;
+				return hex;
+			}
 		},
 
-		dec2hexWithPad: function(dec) {
-			var hex = dec.toString(16);
-			if(hex.length==1) hex="0"+hex;
-			return hex;
-		},
-
-		/*
-		setWidth: function(width) {
-			this.boxWidth = width;
-			this.colorWidth = width * 0.84;
-			this.picker.css({width:this.boxWidth, height:(this.boxWidth*1)});
-			this.color.css({width:(this.colorWidth), height:(this.colorWidth-2)});
-			this.hue.css({width:(this.boxWidth*0.13), height:(this.colorWidth-2)});
-			this.updateMarkers();
-		},
-		*/
 
  		updateMarkers: function() {
 			var width = 200;
-			var hueWidth = 30;
+			var hueWidth = Math.round(width/8);
 
 			var hueTop = (1-this.values.h) * width;
 			var saturationLeft = this.values.s * width;
@@ -289,6 +290,8 @@
 			console.debug("pickerMouseDown", e.target);
 
 			var action = e.target.dataset.component;
+			if(!action) return;
+
 			addEventListener("mousemove", pickerMouseMove, false);
 			addEventListener("mouseup", pickerMouseUp, false);
 			pickerMouseMove(e);
@@ -338,16 +341,24 @@
 		updateInput: function() {
 			var output = "";
 			switch(this.format) {
-				case "rgb": output = this.getRGB(); break;
-				case "hsl": output = this.getHSL(); break;
+				case FORMAT_RGB: output = this.getRGB(); break;
+				case FORMAT_HSL: output = this.getHSL(); break;
 				default: output = this.getHex();
 			}
-			this.input.value = output;
+			if(this.onchange) {
+				this.onchange(output);
+			} else if(this.input) {
+				this.input.value = output;
+			}
 		},
 
 		clickCancel: function() {
 			if(this.autoUpdate) {
-				this.input.value = this.inputValue;
+				if(this.input) {
+					this.input.value = this.startValue;
+				} else if(this.onchange) {
+					this.onchange(this.startValue);
+				}
 			}
 			this.close();
 		},
@@ -372,7 +383,9 @@
 				document.body.removeChild(this.picker);
 				this.picker=null;
 			}
-			this.input.removeEventListener("keydown", this.keyDownBinding, false);
+			if(this.input) {
+ 				this.input.removeEventListener("keydown", this.keyDownBinding, false);
+			}
 		}
 
 
