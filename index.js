@@ -1,6 +1,7 @@
 var blobb = document.getElementById("blobb");
 var picker = new ColorPicker({
-	onchange: blobbOnChange
+	onchange: blobbOnChange,
+	format: 'rgb'
 });
 
 blobb.addEventListener("click", function(e) {
@@ -9,6 +10,7 @@ blobb.addEventListener("click", function(e) {
 });
 
 function blobbOnChange(value) {
+	console.log("value change", value);
 	blobb.style.backgroundColor = value;
 }
 

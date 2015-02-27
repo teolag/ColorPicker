@@ -95,6 +95,16 @@
 			this.hueMark.dataset.component = "hue";
 			this.hue.appendChild(this.hueMark);
 
+			this.alpha = document.createElement("div");
+			this.alpha.classList.add("xcp_alpha");
+			this.alpha.dataset.component = "alpha";
+			this.main.appendChild(this.alpha);
+
+			this.alphaMark = document.createElement("div");
+			this.alphaMark.classList.add("xcp_mark", "xcp_alpha_marker");
+			this.alphaMark.dataset.component = "alpha";
+			this.alpha.appendChild(this.alphaMark);
+
 			this.footer = document.createElement("div");
 			this.footer.classList.add("xcp_footer");
 			this.picker.appendChild(this.footer);
@@ -209,11 +219,15 @@
 			var hueWidth = Math.round(width/8);
 
 			var hueTop = (1-this.values.h) * width;
+			var alphaTop = (1-this.values.a) * width;
 			var saturationLeft = this.values.s * width;
 			var valueTop = (1-this.values.v) * width;
 
 			this.hue.css({width:hueWidth});
 			this.hueMark.css({width:hueWidth, top:hueTop-2});
+
+			this.alpha.css({width:hueWidth});
+			this.alphaMark.css({width:hueWidth, top:alphaTop-2});
 
 			this.saturationMark.css({height:(width-2), left:saturationLeft-2});
 			this.valueMark.css({width:(width), top:valueTop-2});
@@ -314,6 +328,11 @@
 					if(offsetY<0) offsetY=0;
 					else if(offsetY>width) offsetY=width;
 					me.values.h = 1-offsetY/width;
+				} else if(action==="alpha") {
+					var offsetY = e.pageY - me.alpha.position().top - me.picker.position().top;
+					if(offsetY<0) offsetY=0;
+					else if(offsetY>width) offsetY=width;
+					me.values.a = Math.round((1-offsetY/width)*100)/100;
 				} else {
 					if(action==="saturation/value" || action==="saturation") {
 						var offsetX = e.pageX - me.color.position().left - me.picker.position().left;
