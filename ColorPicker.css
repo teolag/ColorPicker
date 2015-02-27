@@ -69,6 +69,7 @@
 
 .xcp_color,
 .xcp_hue,
+.xcp_alpha,
 .xcp_before,
 .xcp_result {
 	border: 1px solid #666;

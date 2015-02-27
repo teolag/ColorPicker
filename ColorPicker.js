@@ -41,15 +41,13 @@
 
 			this.startValue = startColor;
 
-			if(this.input) {
-				this.keyDownBinding = this.keyDown.bind(this);
-				this.input.addEventListener("keydown", this.keyDownBinding, false);
-			}
-
+			this.keyDownBinding = this.keyDown.bind(this);
 
 			this.picker = document.createElement("div");
 			this.picker.classList.add("xcp_picker");
 			this.picker.addEventListener("mousedown", this.pickerMouseDown.bind(this));
+			this.picker.setAttribute("tabindex",1);
+			this.picker.addEventListener("keydown", this.keyDownBinding, false);
 			this.picker.css({top: 10, left: 400});
 			document.body.appendChild(this.picker);
 
@@ -178,7 +176,7 @@
 			var r=this.values.r,
 				g=this.values.g,
 				b=this.values.b,
-				a=this.values.a;
+				a=Math.round(this.values.a*100)/100;
 
 			if(a<1) {
 				return "rgba("+r+","+g+","+b+","+a+")";
@@ -191,7 +189,7 @@
 			var h=Math.round(this.values.h*360),
 				s=Math.round(this.values.s*100),
 				l=Math.round(this.values.v*100),
-				a=this.values.a;
+				a=Math.round(this.values.a*100)/100;
 
 			if(a<1) {
 				return "hsla("+h+","+s+"%,"+l+"%,"+a+")";
@@ -232,6 +230,7 @@
 			this.saturationMark.css({height:(width-2), left:saturationLeft-2});
 			this.valueMark.css({width:(width), top:valueTop-2});
 			this.colorPoint.css({top:valueTop-6, left:saturationLeft-6, backgroundColor: this.getHex()});
+			this.picker.focus();
 		},
 
 
@@ -308,7 +307,6 @@
 
 			addEventListener("mousemove", pickerMouseMove, false);
 			addEventListener("mouseup", pickerMouseUp, false);
-			pickerMouseMove(e);
 			e.stopPropagation();
 
 
@@ -332,7 +330,7 @@
 					var offsetY = e.pageY - me.alpha.position().top - me.picker.position().top;
 					if(offsetY<0) offsetY=0;
 					else if(offsetY>width) offsetY=width;
-					me.values.a = Math.round((1-offsetY/width)*100)/100;
+					me.values.a = (1-offsetY/width);
 				} else {
 					if(action==="saturation/value" || action==="saturation") {
 						var offsetX = e.pageX - me.color.position().left - me.picker.position().left;
@@ -384,10 +382,10 @@
 
 
 		keyDown: function(e) {
+			//console.log("key down",e);
 			switch(e.which) {
 				case 13: //Enter
 				this.clickOk();
-				console.log("click ok");
 				e.preventDefault();
 				break;
 
