@@ -1,6 +1,5 @@
 (function() {
 	"use strict";
-	var someOpen=false;
 
 	var FORMAT_RGB = 'rgb';
 	var FORMAT_HSL = 'hsl';
@@ -20,8 +19,17 @@
 		}
 
 		me.format = o.format || FORMAT_HEX;
-		me.autoUpdate = o.autoUpdate || true;
-		me.onchange = o.onchange || null;
+		me.onChange = o.onChange || null;
+
+		me.useAlpha = true;
+		if(o.hasOwnProperty("useAlpha")) {
+			me.useAlpha = o.useAlpha;
+		}
+
+		me.autoUpdate = true;
+		if(o.hasOwnProperty("autoUpdate")) {
+			me.autoUpdate = o.autoUpdate;
+		}
 
 		me.values = {
 			r:0, g:0, b:0,
@@ -36,7 +44,6 @@
 
 		open: function(startColor) {
 			console.debug("create tool");
-			someOpen=true;
 			this.close();
 
 			this.startValue = startColor;
@@ -93,15 +100,17 @@
 			this.hueMark.dataset.component = "hue";
 			this.hue.appendChild(this.hueMark);
 
-			this.alpha = document.createElement("div");
-			this.alpha.classList.add("xcp_alpha");
-			this.alpha.dataset.component = "alpha";
-			this.main.appendChild(this.alpha);
+			if(this.useAlpha) {
+				this.alpha = document.createElement("div");
+				this.alpha.classList.add("xcp_alpha");
+				this.alpha.dataset.component = "alpha";
+				this.main.appendChild(this.alpha);
 
-			this.alphaMark = document.createElement("div");
-			this.alphaMark.classList.add("xcp_mark", "xcp_alpha_marker");
-			this.alphaMark.dataset.component = "alpha";
-			this.alpha.appendChild(this.alphaMark);
+				this.alphaMark = document.createElement("div");
+				this.alphaMark.classList.add("xcp_mark", "xcp_alpha_marker");
+				this.alphaMark.dataset.component = "alpha";
+				this.alpha.appendChild(this.alphaMark);
+			}
 
 			this.footer = document.createElement("div");
 			this.footer.classList.add("xcp_footer");
@@ -150,7 +159,6 @@
 			this.fields.appendChild(this.outputHEX);
 
 
-
 			if(this.startValue) {
 				this.parseInput(this.startValue);
 				this.before.style.backgroundColor = this.getRGB();
@@ -178,7 +186,7 @@
 				b=this.values.b,
 				a=Math.round(this.values.a*100)/100;
 
-			if(a<1) {
+			if(a<1 && this.useAlpha) {
 				return "rgba("+r+","+g+","+b+","+a+")";
 			} else {
 				return "rgb("+r+","+g+","+b+")";
@@ -191,7 +199,7 @@
 				l=Math.round(this.values.v*100),
 				a=Math.round(this.values.a*100)/100;
 
-			if(a<1) {
+			if(a<1 && this.useAlpha) {
 				return "hsla("+h+","+s+"%,"+l+"%,"+a+")";
 			} else {
 				return "hsl("+h+","+s+ "%,"+l+"%)";
@@ -217,20 +225,21 @@
 			var hueWidth = Math.round(width/8);
 
 			var hueTop = (1-this.values.h) * width;
-			var alphaTop = (1-this.values.a) * width;
 			var saturationLeft = this.values.s * width;
 			var valueTop = (1-this.values.v) * width;
 
 			this.hue.css({width:hueWidth});
 			this.hueMark.css({width:hueWidth, top:hueTop-2});
 
-			this.alpha.css({width:hueWidth});
-			this.alphaMark.css({width:hueWidth, top:alphaTop-2});
+			if(this.useAlpha) {
+				var alphaTop = (1-this.values.a) * width;
+				this.alpha.css({width:hueWidth});
+				this.alphaMark.css({width:hueWidth, top:alphaTop-2});
+			}
 
 			this.saturationMark.css({height:(width-2), left:saturationLeft-2});
 			this.valueMark.css({width:(width), top:valueTop-2});
 			this.colorPoint.css({top:valueTop-6, left:saturationLeft-6, backgroundColor: this.getHex()});
-			this.picker.focus();
 		},
 
 
@@ -242,7 +251,6 @@
 			this.values.h = hsv.h;
 			this.values.s = hsv.s;
 			this.values.v = hsv.v;
-			console.log("Set color", this.values);
 			this.updateInputs();
 			this.updateMarkers();
 		},
@@ -278,6 +286,14 @@
 		},
 
 		parseInput: function(input) {
+
+			if(input.search(/^[A-F0-9]{3}$/i)==0 || input.search(/^[A-F0-9]{6}$/i)==0) {
+				this.noHash = true;
+				input = "#" + input;
+			} else {
+				this.noHash = false;
+			}
+
 			var div = document.createElement('div'), m;
 			div.style.color = input;
 			console.debug("parseColor", input, div.style.color, div);
@@ -308,6 +324,8 @@
 			addEventListener("mousemove", pickerMouseMove, false);
 			addEventListener("mouseup", pickerMouseUp, false);
 			e.stopPropagation();
+
+			pickerMouseMove(e);
 
 
 			function pickerMouseUp(e) {
@@ -360,10 +378,14 @@
 			switch(this.format) {
 				case FORMAT_RGB: output = this.getRGB(); break;
 				case FORMAT_HSL: output = this.getHSL(); break;
-				default: output = this.getHex();
+				default:
+					output = this.getHex();
+					if(this.noHash) {
+						output=output.replace("#","");
+					}
 			}
-			if(this.onchange) {
-				this.onchange(output);
+			if(this.onChange) {
+				this.onChange(output);
 			} else if(this.input) {
 				this.input.value = output;
 			}
@@ -371,10 +393,10 @@
 
 		clickCancel: function() {
 			if(this.autoUpdate) {
-				if(this.input) {
+				if(this.onChange) {
+					this.onChange(this.startValue);
+				} else if(this.input) {
 					this.input.value = this.startValue;
-				} else if(this.onchange) {
-					this.onchange(this.startValue);
 				}
 			}
 			this.close();
