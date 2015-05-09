@@ -13,7 +13,6 @@
 		if (typeof options == "object") {
 
 		}
-
 	}
 
 	var cmColor = new ColorPicker({
@@ -43,15 +42,13 @@
 		var selection = me.doc.getSelection();
 		console.log("select", selection);
 
-		if(selection.search(/^#?[A-F0-9]{6}$/i)==0) {
+		if(selection.search(/^#?[A-F0-9]{6}$/i)==0 ||
+		  selection.search(/^rgba?\(.*?\)$/i)==0 ||
+		  selection.search(/^hsla?\(.*?\)$/i)==0) {
 			cmColor.open(selection);
-
-
 		} else {
 			cmColor.close();
 		}
-
-
 	}
 });
 

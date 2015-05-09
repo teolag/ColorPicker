@@ -1,27 +1,25 @@
 
 .xcp_picker {
 	position: absolute;
+	z-index: 5;
 	background-color: #444;
 	padding: 10px;
 	border-radius: 5px;
 	box-shadow: 0 1px 25px rgba(0,0,0,0.5);
+	font-family: sans-serif;
 }
 
 .xcp_main {
 	display: flex;
-	height:200px;
-
 }
 
 .xcp_color {
-	width:200px;
 	background-color:red;
 	cursor: crosshair;
 	position: relative;
 }
 
 .xcp_hue {
-	width:20px;
 	background: -webkit-linear-gradient(top,#F00 0%,#F0F 16.6%,#00F 33.3%,#0FF 50%,#0F0 66.7%,#FF0 83.3%,#F00 100%);
 	background: -moz-linear-gradient(top,#F00 0%,#F0F 16.6%,#00F 33.3%,#0FF 50%,#0F0 66.7%,#FF0 83.3%,#F00 100%);
 	position: relative;
@@ -29,7 +27,6 @@
 }
 
 .xcp_alpha {
-	width:20px;
 	background-image: -webkit-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%),
 					  url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAASklEQVRIS+3UMQ4AMAgCQPiE/3+ck09wqWs34triTEJyIbK7DxZXVYs0QBcoLxMpIa9ICr1AlJmrXxQR2uVK0AXKy0RKCCb6gGgAnmd/ObCz3Z4AAAAASUVORK5CYII=);
 	background-image: -moz-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%),
@@ -82,7 +79,6 @@
 	height:0px;
 	left:-1px;
 	top:-1px;
-	/*background-color: white;*/
 	border:1px solid rgba(255,255,255,0.4);
 	box-shadow: 0 0 3px rgba(0,0,0,0.4);
 }

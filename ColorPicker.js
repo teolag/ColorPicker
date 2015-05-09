@@ -5,6 +5,9 @@
 	var FORMAT_HSL = 'hsl';
 	var FORMAT_HEX = 'hex';
 
+	var size = 400;
+	var hueWidth = Math.round(size/8);
+
 
 	var ColorPicker = function(o) {
 		var me = this;
@@ -18,7 +21,7 @@
 			}, false);
 		}
 
-		me.format = o.format || FORMAT_HEX;
+		me.format = o.format || null;
 		me.onChange = o.onChange || null;
 
 		me.useAlpha = true;
@@ -60,10 +63,12 @@
 
 			this.main = document.createElement("div");
 			this.main.classList.add("xcp_main");
+			this.main.css({height:size});
 			this.picker.appendChild(this.main);
 
 			this.color = document.createElement("div");
 			this.color.classList.add("xcp_color");
+			this.color.css({width:size});
 			this.main.appendChild(this.color);
 
 			this.saturation = document.createElement("div");
@@ -93,22 +98,26 @@
 			this.hue = document.createElement("div");
 			this.hue.classList.add("xcp_hue");
 			this.hue.dataset.component = "hue";
+			this.hue.css({width:hueWidth});
 			this.main.appendChild(this.hue);
 
 			this.hueMark = document.createElement("div");
 			this.hueMark.classList.add("xcp_mark", "xcp_hue_marker");
 			this.hueMark.dataset.component = "hue";
+			this.hueMark.css({width:hueWidth});
 			this.hue.appendChild(this.hueMark);
 
 			if(this.useAlpha) {
 				this.alpha = document.createElement("div");
 				this.alpha.classList.add("xcp_alpha");
 				this.alpha.dataset.component = "alpha";
+				this.alpha.css({width:hueWidth});
 				this.main.appendChild(this.alpha);
 
 				this.alphaMark = document.createElement("div");
 				this.alphaMark.classList.add("xcp_mark", "xcp_alpha_marker");
 				this.alphaMark.dataset.component = "alpha";
+				this.alphaMark.css({width:hueWidth});
 				this.alpha.appendChild(this.alphaMark);
 			}
 
@@ -221,24 +230,19 @@
 
 
  		updateMarkers: function() {
-			var width = 200;
-			var hueWidth = Math.round(width/8);
+			var hueTop = (1-this.values.h) * size;
+			var saturationLeft = this.values.s * size;
+			var valueTop = (1-this.values.v) * size;
 
-			var hueTop = (1-this.values.h) * width;
-			var saturationLeft = this.values.s * width;
-			var valueTop = (1-this.values.v) * width;
-
-			this.hue.css({width:hueWidth});
-			this.hueMark.css({width:hueWidth, top:hueTop-2});
+			this.hueMark.css({top:hueTop-2});
 
 			if(this.useAlpha) {
-				var alphaTop = (1-this.values.a) * width;
-				this.alpha.css({width:hueWidth});
-				this.alphaMark.css({width:hueWidth, top:alphaTop-2});
+				var alphaTop = (1-this.values.a) * size;
+				this.alphaMark.css({top:alphaTop-2});
 			}
 
-			this.saturationMark.css({height:(width-2), left:saturationLeft-2});
-			this.valueMark.css({width:(width), top:valueTop-2});
+			this.saturationMark.css({height:(size-2), left:saturationLeft-2});
+			this.valueMark.css({width:(size), top:valueTop-2});
 			this.colorPoint.css({top:valueTop-6, left:saturationLeft-6, backgroundColor: this.getHex()});
 		},
 
@@ -294,6 +298,15 @@
 				this.noHash = false;
 			}
 
+			this.values.a = 1;
+			if(input.indexOf("#")>-1) {
+				this.inputFormat = FORMAT_HEX;
+			} else if(input.indexOf("rgb")>-1) {
+				this.inputFormat = FORMAT_RGB;
+			} else if(input.indexOf("hsl")>-1) {
+				this.inputFormat = FORMAT_HSL;
+			}
+
 			var div = document.createElement('div'), m;
 			div.style.color = input;
 			console.debug("parseColor", input, div.style.color, div);
@@ -337,30 +350,29 @@
 
 			function pickerMouseMove(e) {
 				console.log("move", action);
-				var width = 200;
 
 				if(action==="hue") {
 					var offsetY = e.pageY - me.hue.position().top - me.picker.position().top;
 					if(offsetY<0) offsetY=0;
-					else if(offsetY>width) offsetY=width;
-					me.values.h = 1-offsetY/width;
+					else if(offsetY>size) offsetY=size;
+					me.values.h = 1-offsetY/size;
 				} else if(action==="alpha") {
 					var offsetY = e.pageY - me.alpha.position().top - me.picker.position().top;
 					if(offsetY<0) offsetY=0;
-					else if(offsetY>width) offsetY=width;
-					me.values.a = (1-offsetY/width);
+					else if(offsetY>size) offsetY=size;
+					me.values.a = (1-offsetY/size);
 				} else {
 					if(action==="saturation/value" || action==="saturation") {
 						var offsetX = e.pageX - me.color.position().left - me.picker.position().left;
 						if(offsetX<0) offsetX=0;
-						else if(offsetX>width) offsetX=width;
-						me.values.s = offsetX/width;
+						else if(offsetX>size) offsetX=size;
+						me.values.s = offsetX/size;
 					}
 					if(action==="saturation/value" || action==="value") {
 						var offsetY = e.pageY - me.color.position().top - me.picker.position().top;
 						if(offsetY<0) offsetY=0;
-						else if(offsetY>width) offsetY=width;
-						me.values.v = 1-offsetY/width;
+						else if(offsetY>size) offsetY=size;
+						me.values.v = 1-offsetY/size;
 					}
 				}
 				me.updateRGB();
@@ -375,7 +387,10 @@
 
 		updateInput: function() {
 			var output = "";
-			switch(this.format) {
+
+			var format = this.format || this.inputFormat;
+
+			switch(format) {
 				case FORMAT_RGB: output = this.getRGB(); break;
 				case FORMAT_HSL: output = this.getHSL(); break;
 				default:
