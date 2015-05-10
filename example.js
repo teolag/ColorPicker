@@ -8,12 +8,7 @@
 })(function(CodeMirror) {
   "use strict";
 
-
-	function State(options) {
-		if (typeof options == "object") {
-
-		}
-	}
+	var selectionListener = true;
 
 	var cmColor = new ColorPicker({
 		onChange: cmColorChange,
@@ -22,25 +17,27 @@
 
 	CodeMirror.defineOption("colorpicker", false, function(cm, val, old) {
 		if (old && old != CodeMirror.Init) {
-			cm.state.colorpicker = null;
 			cm.off("cursorActivity", cursorActivity);
 		}
 		if (val) {
-			cm.state.colorpicker = new State(val);
 			cm.on("cursorActivity", cursorActivity);
 		}
 	});
 
 	function cmColorChange(color) {
+		selectionListener=false;
 		console.log("colorchange", color);
 		cm.doc.replaceSelection(color, "around");
+		cm.doc.setSelection(cm.doc.getCursor());
+		cm.focus();
+		selectionListener=true;
+
 	}
 
 	function cursorActivity(me) {
-		//console.log("cursorActivity", me);
+		if(!selectionListener) return;
 
 		var selection = me.doc.getSelection();
-		console.log("select", selection);
 
 		if(selection.search(/^#?[A-F0-9]{6}$/i)==0 ||
 		  selection.search(/^rgba?\(.*?\)$/i)==0 ||
