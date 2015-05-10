@@ -167,6 +167,10 @@
 			this.outputHEX.classList.add("output");
 			this.fields.appendChild(this.outputHEX);
 
+			this.outputHSL = document.createElement("div");
+			this.outputHSL.classList.add("output");
+			this.fields.appendChild(this.outputHSL);
+
 
 			if(this.startValue) {
 				this.parseInput(this.startValue);
@@ -179,7 +183,11 @@
 
 		updateInputs: function() {
 			this.outputRGB.innerHTML = this.getRGB();
+			this.outputRGB.style.color = this.getRGB();
 			this.outputHEX.innerHTML = this.getHex();
+			this.outputHEX.style.color = this.getHex();
+			this.outputHSL.innerHTML = this.getHSL();
+			this.outputHSL.style.color = this.getHSL();
 
 			if(this.autoUpdate) {
 				this.updateInput();
@@ -203,9 +211,11 @@
 		},
 
 		getHSL: function() {
-			var h=Math.round(this.values.h*360),
-				s=Math.round(this.values.s*100),
-				l=Math.round(this.values.v*100),
+			var hsl = hsv2hsl(this.values.h, this.values.s, this.values.v);
+
+			var h=Math.round(hsl.h*360),
+				s=Math.round(hsl.s*100),
+				l=Math.round(hsl.l*100),
 				a=Math.round(this.values.a*100)/100;
 
 			if(a<1 && this.useAlpha) {
@@ -349,7 +359,7 @@
 			}
 
 			function pickerMouseMove(e) {
-				console.log("move", action);
+				//console.log("move", action);
 
 				if(action==="hue") {
 					var offsetY = e.pageY - me.hue.position().top - me.picker.position().top;
@@ -487,7 +497,7 @@
 
 		if(max == min){
 			h = 0; // achromatic
-		}else{
+		} else {
 			switch(max){
 				case r: h = (g - b) / d + (g < b ? 6 : 0); break;
 				case g: h = (b - r) / d + 2; break;
@@ -497,6 +507,17 @@
 		}
 
 		return {h:h, s:s, v:v};
+	}
+
+
+	function hsv2hsl(hue,sat,val){
+
+		var temp = (2-sat)*val;
+		if(sat===0 || val===0) var s=0;
+		else var s = sat*val/(temp<1?temp:2-temp);
+		var l = temp/2;
+
+		return {h:hue, s:s, l:l};
 	}
 
 

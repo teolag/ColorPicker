@@ -26,7 +26,7 @@
 
 	function cmColorChange(color) {
 		selectionListener=false;
-		console.log("colorchange", color);
+		//console.log("colorchange", color);
 		cm.doc.replaceSelection(color, "around");
 		cm.doc.setSelection(cm.doc.getCursor());
 		cm.focus();
@@ -69,7 +69,7 @@ blobb.addEventListener("click", function(e) {
 });
 
 function blobbOnChange(value) {
-	console.log("value change", value);
+	//console.log("value change", value);
 	blobb.style.backgroundColor = value;
 }
 
