@@ -1,61 +1,3 @@
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-  "use strict";
-
-	var selectionListener = true;
-
-	var cmColor = new ColorPicker({
-		onChange: cmColorChange,
-		autoUpdate: false
-	});
-
-	CodeMirror.defineOption("colorpicker", false, function(cm, val, old) {
-		if (old && old != CodeMirror.Init) {
-			cm.off("cursorActivity", cursorActivity);
-		}
-		if (val) {
-			cm.on("cursorActivity", cursorActivity);
-		}
-	});
-
-	function cmColorChange(color) {
-		selectionListener=false;
-		//console.log("colorchange", color);
-		cm.doc.replaceSelection(color, "around");
-		cm.doc.setSelection(cm.doc.getCursor());
-		cm.focus();
-		selectionListener=true;
-
-	}
-
-	function cursorActivity(me) {
-		if(!selectionListener) return;
-
-		var selection = me.doc.getSelection();
-
-		if(selection.search(/^#?[A-F0-9]{6}$/i)==0 ||
-		  selection.search(/^rgba?\(.*?\)$/i)==0 ||
-		  selection.search(/^hsla?\(.*?\)$/i)==0) {
-			cmColor.open(selection);
-		} else {
-			cmColor.close();
-		}
-	}
-});
-
-
-
-
-
-
-
-
 var blobb = document.getElementById("blobb");
 var picker = new ColorPicker({
 	onChange: blobbOnChange,
@@ -95,7 +37,7 @@ var picker5 = new ColorPicker({input:color5, format:"hsl"});
 var textarea = document.getElementById("textarea");
 var cm = CodeMirror.fromTextArea(textarea, {
 	lineNumbers: true,
-	colorpicker: true
+	colorpicker: {size: 333}
 });
 
 

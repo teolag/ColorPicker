@@ -5,7 +5,7 @@
 	var FORMAT_HSL = 'hsl';
 	var FORMAT_HEX = 'hex';
 
-	var size = 400;
+	var defaultSize = 200;
 	var hueWidth = 30; //Math.round(size/8);
 
 
@@ -20,6 +20,9 @@
 				me.open(startColor);
 			}, false);
 		}
+
+		this.size = o.size || defaultSize;
+		this.hueWidth = Math.ceil(this.size/10);
 
 		me.format = o.format || null;
 		me.onChange = o.onChange || null;
@@ -63,12 +66,12 @@
 
 			this.main = document.createElement("div");
 			this.main.classList.add("xcp_main");
-			this.main.css({height:size});
+			this.main.css({height:this.size});
 			this.picker.appendChild(this.main);
 
 			this.color = document.createElement("div");
 			this.color.classList.add("xcp_color");
-			this.color.css({width:size});
+			this.color.css({width:this.size});
 			this.main.appendChild(this.color);
 
 			this.saturation = document.createElement("div");
@@ -98,26 +101,26 @@
 			this.hue = document.createElement("div");
 			this.hue.classList.add("xcp_hue");
 			this.hue.dataset.component = "hue";
-			this.hue.css({width:hueWidth});
+			this.hue.css({width:this.hueWidth});
 			this.main.appendChild(this.hue);
 
 			this.hueMark = document.createElement("div");
 			this.hueMark.classList.add("xcp_mark", "xcp_hue_marker");
 			this.hueMark.dataset.component = "hue";
-			this.hueMark.css({width:hueWidth});
+			this.hueMark.css({width:this.hueWidth});
 			this.hue.appendChild(this.hueMark);
 
 			if(this.useAlpha) {
 				this.alpha = document.createElement("div");
 				this.alpha.classList.add("xcp_alpha");
 				this.alpha.dataset.component = "alpha";
-				this.alpha.css({width:hueWidth});
+				this.alpha.css({width:this.hueWidth});
 				this.main.appendChild(this.alpha);
 
 				this.alphaMark = document.createElement("div");
 				this.alphaMark.classList.add("xcp_mark", "xcp_alpha_marker");
 				this.alphaMark.dataset.component = "alpha";
-				this.alphaMark.css({width:hueWidth});
+				this.alphaMark.css({width:this.hueWidth});
 				this.alpha.appendChild(this.alphaMark);
 			}
 
@@ -240,19 +243,19 @@
 
 
  		updateMarkers: function() {
-			var hueTop = (1-this.values.h) * size;
-			var saturationLeft = this.values.s * size;
-			var valueTop = (1-this.values.v) * size;
+			var hueTop = (1-this.values.h) * this.size;
+			var saturationLeft = this.values.s * this.size;
+			var valueTop = (1-this.values.v) * this.size;
 
 			this.hueMark.css({top:hueTop-2});
 
 			if(this.useAlpha) {
-				var alphaTop = (1-this.values.a) * size;
+				var alphaTop = (1-this.values.a) * this.size;
 				this.alphaMark.css({top:alphaTop-2});
 			}
 
-			this.saturationMark.css({height:(size-2), left:saturationLeft-2});
-			this.valueMark.css({width:(size), top:valueTop-2});
+			this.saturationMark.css({height:(this.size-2), left:saturationLeft-2});
+			this.valueMark.css({width:(this.size), top:valueTop-2});
 			this.colorPoint.css({top:valueTop-6, left:saturationLeft-6, backgroundColor: this.getHex()});
 		},
 
@@ -364,25 +367,25 @@
 				if(action==="hue") {
 					var offsetY = e.pageY - me.hue.position().top - me.picker.position().top;
 					if(offsetY<0) offsetY=0;
-					else if(offsetY>size) offsetY=size;
-					me.values.h = 1-offsetY/size;
+					else if(offsetY>me.size) offsetY=me.size;
+					me.values.h = 1-offsetY/me.size;
 				} else if(action==="alpha") {
 					var offsetY = e.pageY - me.alpha.position().top - me.picker.position().top;
 					if(offsetY<0) offsetY=0;
-					else if(offsetY>size) offsetY=size;
-					me.values.a = (1-offsetY/size);
+					else if(offsetY>me.size) offsetY=me.size;
+					me.values.a = (1-offsetY/me.size);
 				} else {
 					if(action==="saturation/value" || action==="saturation") {
 						var offsetX = e.pageX - me.color.position().left - me.picker.position().left;
 						if(offsetX<0) offsetX=0;
-						else if(offsetX>size) offsetX=size;
-						me.values.s = offsetX/size;
+						else if(offsetX>me.size) offsetX=me.size;
+						me.values.s = offsetX/me.size;
 					}
 					if(action==="saturation/value" || action==="value") {
 						var offsetY = e.pageY - me.color.position().top - me.picker.position().top;
 						if(offsetY<0) offsetY=0;
-						else if(offsetY>size) offsetY=size;
-						me.values.v = 1-offsetY/size;
+						else if(offsetY>me.size) offsetY=me.size;
+						me.values.v = 1-offsetY/me.size;
 					}
 				}
 				me.updateRGB();
@@ -537,3 +540,58 @@
 	};
 
 }());
+
+
+
+
+
+(function(mod) {
+	if (typeof exports == "object" && typeof module == "object") // CommonJS
+		mod(require("../../lib/codemirror"));
+	else if (typeof define == "function" && define.amd) // AMD
+		define(["../../lib/codemirror"], mod);
+	else if (CodeMirror) // Plain browser env
+	  	mod(CodeMirror);
+})(function(CodeMirror) {
+  "use strict";
+
+	var selectionListener = true;
+	var cmColor;
+
+	CodeMirror.defineOption("colorpicker", false, function(cm, val, old) {
+		if (old && old != CodeMirror.Init) {
+			cm.off("cursorActivity", cursorActivity);
+		}
+		if (val) {
+			cm.on("cursorActivity", cursorActivity);
+			cmColor = new ColorPicker({
+				onChange: cmColorChange,
+				autoUpdate: false,
+				size: val.size || null
+			});
+		}
+	});
+
+	function cmColorChange(color) {
+		selectionListener=false;
+		//console.log("colorchange", color);
+		cm.doc.replaceSelection(color, "around");
+		cm.doc.setSelection(cm.doc.getCursor());
+		cm.focus();
+		selectionListener=true;
+	}
+
+	function cursorActivity(me) {
+		if(!selectionListener) return;
+
+		var selection = me.doc.getSelection();
+
+		if(selection.search(/^#?[A-F0-9]{6}$/i)==0 ||
+			selection.search(/^rgba?\(.*?\)$/i)==0 ||
+			selection.search(/^hsla?\(.*?\)$/i)==0) {
+			cmColor.open(selection);
+		} else {
+			cmColor.close();
+		}
+	}
+});
