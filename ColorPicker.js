@@ -570,29 +570,31 @@
 				autoUpdate: false,
 				size: val.size || null
 			});
+
+			function cmColorChange(color) {
+				selectionListener=false;
+				//console.log("colorchange", color);
+				cm.doc.replaceSelection(color, "around");
+				cm.doc.setSelection(cm.doc.getCursor());
+				cm.focus();
+				selectionListener=true;
+			}
+
+			function cursorActivity(me) {
+				if(!selectionListener) return;
+
+				var selection = me.doc.getSelection();
+
+				if(selection.search(/^#?[A-F0-9]{6}$/i)==0 ||
+					selection.search(/^rgba?\(.*?\)$/i)==0 ||
+					selection.search(/^hsla?\(.*?\)$/i)==0) {
+					cmColor.open(selection);
+				} else {
+					cmColor.close();
+				}
+			}
 		}
 	});
 
-	function cmColorChange(color) {
-		selectionListener=false;
-		//console.log("colorchange", color);
-		cm.doc.replaceSelection(color, "around");
-		cm.doc.setSelection(cm.doc.getCursor());
-		cm.focus();
-		selectionListener=true;
-	}
 
-	function cursorActivity(me) {
-		if(!selectionListener) return;
-
-		var selection = me.doc.getSelection();
-
-		if(selection.search(/^#?[A-F0-9]{6}$/i)==0 ||
-			selection.search(/^rgba?\(.*?\)$/i)==0 ||
-			selection.search(/^hsla?\(.*?\)$/i)==0) {
-			cmColor.open(selection);
-		} else {
-			cmColor.close();
-		}
-	}
 });
