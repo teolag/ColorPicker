@@ -66,12 +66,10 @@
 
 			this.main = document.createElement("div");
 			this.main.classList.add("xcp_main");
-			this.main.css({height:this.size});
 			this.picker.appendChild(this.main);
 
 			this.color = document.createElement("div");
 			this.color.classList.add("xcp_color");
-			this.color.css({width:this.size});
 			this.main.appendChild(this.color);
 
 			this.saturation = document.createElement("div");
@@ -101,26 +99,22 @@
 			this.hue = document.createElement("div");
 			this.hue.classList.add("xcp_hue");
 			this.hue.dataset.component = "hue";
-			this.hue.css({width:this.hueWidth});
 			this.main.appendChild(this.hue);
 
 			this.hueMark = document.createElement("div");
 			this.hueMark.classList.add("xcp_mark", "xcp_hue_marker");
 			this.hueMark.dataset.component = "hue";
-			this.hueMark.css({width:this.hueWidth});
 			this.hue.appendChild(this.hueMark);
 
 			if(this.useAlpha) {
 				this.alpha = document.createElement("div");
 				this.alpha.classList.add("xcp_alpha");
 				this.alpha.dataset.component = "alpha";
-				this.alpha.css({width:this.hueWidth});
 				this.main.appendChild(this.alpha);
 
 				this.alphaMark = document.createElement("div");
 				this.alphaMark.classList.add("xcp_mark", "xcp_alpha_marker");
 				this.alphaMark.dataset.component = "alpha";
-				this.alphaMark.css({width:this.hueWidth});
 				this.alpha.appendChild(this.alphaMark);
 			}
 
@@ -243,20 +237,25 @@
 
 
  		updateMarkers: function() {
-			var hueTop = (1-this.values.h) * this.size;
-			var saturationLeft = this.values.s * this.size;
-			var valueTop = (1-this.values.v) * this.size;
+			var s = this.color.offsetHeight;
 
-			this.hueMark.css({top:hueTop-2});
+			var hueTop = (1-this.values.h) * s;
+			var saturationLeft = this.values.s * s;
+			var valueTop = (1-this.values.v) * s;
+
+			this.hueMark.style.top = (1-this.values.h)*100 + '%';
 
 			if(this.useAlpha) {
-				var alphaTop = (1-this.values.a) * this.size;
-				this.alphaMark.css({top:alphaTop-2});
+				var alphaTop = (1-this.values.a) * s;
+				this.alphaMark.style.top = (1-this.values.a)*100 + '%';
 			}
 
-			this.saturationMark.css({height:(this.size-2), left:saturationLeft-2});
-			this.valueMark.css({width:(this.size), top:valueTop-2});
-			this.colorPoint.css({top:valueTop-6, left:saturationLeft-6, backgroundColor: this.getHex()});
+			this.saturationMark.style.left = this.values.s*100 + '%';
+			this.valueMark.style.top = (1-this.values.v)*100 + '%';
+
+			this.colorPoint.style.top = (1-this.values.v)*100 + '%';
+			this.colorPoint.style.left = this.values.s*100 + '%';
+			this.colorPoint.style.backgroundColor = this.getHex();
 		},
 
 
@@ -344,6 +343,8 @@
 			if(e.button!==0) return;
 			console.debug("pickerMouseDown", e.target);
 
+			var s = this.color.offsetHeight;
+
 			var action = e.target.dataset.component;
 			if(!action) return;
 
@@ -367,25 +368,25 @@
 				if(action==="hue") {
 					var offsetY = e.pageY - me.hue.position().top - me.picker.position().top;
 					if(offsetY<0) offsetY=0;
-					else if(offsetY>me.size) offsetY=me.size;
-					me.values.h = 1-offsetY/me.size;
+					else if(offsetY>s) offsetY=s;
+					me.values.h = 1-offsetY/s;
 				} else if(action==="alpha") {
 					var offsetY = e.pageY - me.alpha.position().top - me.picker.position().top;
 					if(offsetY<0) offsetY=0;
-					else if(offsetY>me.size) offsetY=me.size;
-					me.values.a = (1-offsetY/me.size);
+					else if(offsetY>s) offsetY=s;
+					me.values.a = (1-offsetY/s);
 				} else {
 					if(action==="saturation/value" || action==="saturation") {
 						var offsetX = e.pageX - me.color.position().left - me.picker.position().left;
 						if(offsetX<0) offsetX=0;
-						else if(offsetX>me.size) offsetX=me.size;
-						me.values.s = offsetX/me.size;
+						else if(offsetX>s) offsetX=s;
+						me.values.s = offsetX/s;
 					}
 					if(action==="saturation/value" || action==="value") {
 						var offsetY = e.pageY - me.color.position().top - me.picker.position().top;
 						if(offsetY<0) offsetY=0;
-						else if(offsetY>me.size) offsetY=me.size;
-						me.values.v = 1-offsetY/me.size;
+						else if(offsetY>s) offsetY=s;
+						me.values.v = 1-offsetY/s;
 					}
 				}
 				me.updateRGB();

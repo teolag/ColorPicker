@@ -3,27 +3,39 @@
 	position: absolute;
 	z-index: 5;
 	background-color: #444;
-	padding: 10px;
+	padding: 0.5em;
 	border-radius: 5px;
 	box-shadow: 0 1px 25px rgba(0,0,0,0.5);
 	font-family: sans-serif;
+	font-size: 12px;
 }
 
 .xcp_main {
 	display: flex;
+	height: 20em
 }
 
 .xcp_color {
 	background-color:red;
 	cursor: crosshair;
 	position: relative;
+	width: 20em;
 }
+
+
+.xcp_hue,
+.xcp_hue_marker.xcp_mark,
+.xcp_alpha,
+.xcp_alpha_marker.xcp_mark {
+	width: 2em;
+}
+
 
 .xcp_hue {
 	background: -webkit-linear-gradient(top,#F00 0%,#F0F 16.6%,#00F 33.3%,#0FF 50%,#0F0 66.7%,#FF0 83.3%,#F00 100%);
 	background: -moz-linear-gradient(top,#F00 0%,#F0F 16.6%,#00F 33.3%,#0FF 50%,#0F0 66.7%,#FF0 83.3%,#F00 100%);
 	position: relative;
-	margin-left: 10px;
+	margin-left: 0.5em;
 }
 
 .xcp_alpha {
@@ -32,7 +44,7 @@
 	background-image: -moz-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%),
 					  url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAASklEQVRIS+3UMQ4AMAgCQPiE/3+ck09wqWs34triTEJyIbK7DxZXVYs0QBcoLxMpIa9ICr1AlJmrXxQR2uVK0AXKy0RKCCb6gGgAnmd/ObCz3Z4AAAAASUVORK5CYII=);
 	position: relative;
-	margin-left: 10px;
+	margin-left: 0.5em;
 }
 
 .xcp_saturation {
@@ -60,7 +72,8 @@
 	position:absolute;
 	cursor:crosshair;
 	border:1px solid rgba(255,255,255,0.5);
-
+	margin-left: -6px;
+	margin-top: -6px;
 }
 
 
@@ -83,37 +96,43 @@
 	box-shadow: 0 0 3px rgba(0,0,0,0.4);
 }
 
-.xcp_hue_marker {
+.xcp_hue_marker,
+.xcp_alpha_marker {
 	cursor:row-resize;
+	margin-top: -1px;
 }
 
 .xcp_saturation_marker {
 	cursor:col-resize;
+	height: 100%;
+	margin-left: -2px;
 }
 
 .xcp_value_marker {
 	cursor:row-resize;
+	width: 100%;
+	margin-top: -1px;
 }
 
 
 .xcp_footer {
 	display: flex;
-	height: 22px;
-	margin-top: 10px;
+	height: 2em;
+	margin-top: 0.5em;
 }
 
 .xcp_before,
 .xcp_result {
-	width: 20px;
+	width: 2em;
 }
 
 .xcp_arrow {
-	border-left: 10px solid #666;
-	border-top: 5px solid transparent;
+	border-left: 1em solid #666;
+	border-top: 0.5em solid transparent;
 	content: "";
-	border-bottom: 5px solid transparent;
+	border-bottom: 0.5em solid transparent;
 	align-self: center;
-	margin: 5px;
+	margin: 0.5em;
 }
 
 .xcp_fields {
@@ -126,6 +145,8 @@
 	background-color: #aaa;
 	color: #000;
 	cursor: pointer;
+	padding: 0 1em;
+	font-size: 1em;
 }
 .xcp_button:hover {
 	background-color: #ccc;
@@ -134,7 +155,7 @@
 
 .xcp_picker .output {
 	color: #888;
-	font-size: 10px;
-	margin-left: 10px;
+	margin-left: 0.5em;
+	font-size: 0.6em;
 }
 
