@@ -6,7 +6,7 @@
 	var FORMAT_HEX = 'hex';
 
 	var size = 400;
-	var hueWidth = Math.round(size/8);
+	var hueWidth = 30; //Math.round(size/8);
 
 
 	var ColorPicker = function(o) {
@@ -183,11 +183,11 @@
 
 		updateInputs: function() {
 			this.outputRGB.innerHTML = this.getRGB();
-			this.outputRGB.style.color = this.getRGB();
+			//this.outputRGB.style.color = this.getRGB();
 			this.outputHEX.innerHTML = this.getHex();
-			this.outputHEX.style.color = this.getHex();
+			//this.outputHEX.style.color = this.getHex();
 			this.outputHSL.innerHTML = this.getHSL();
-			this.outputHSL.style.color = this.getHSL();
+			//this.outputHSL.style.color = this.getHSL();
 
 			if(this.autoUpdate) {
 				this.updateInput();
