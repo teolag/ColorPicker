@@ -61,7 +61,7 @@
 			this.picker.addEventListener("mousedown", this.pickerMouseDown.bind(this));
 			this.picker.setAttribute("tabindex",1);
 			this.picker.addEventListener("keydown", this.keyDownBinding, false);
-			this.picker.css({top: 10, left: 400});
+			this.picker.css({top: 20, left: 20});
 			document.body.appendChild(this.picker);
 
 			this.main = document.createElement("div");
